@@ -9,7 +9,7 @@ class Locals {
        const secret : string = process.env.SECRET as string || "qwerty";
        const mongooseUrl : string = process.env.MONGOOSE_URL as string || "mongodb+srv://praffulbansal123:Bansal%400966@cluster0.d27ax.mongodb.net/PB-ECommerce-DB?retryWrites=true&w=majority";
        const ttl : number = parseInt(process.env.TTL as string) || 172800;
-       const jwtExpiration : number = parseInt(process.env.JWT_EXPIRATION as string) || 3600;
+       const jwtExpiration : string = process.env.JWT_EXPIRATION as string || "3600s";
        const jwtSecret : string = process.env.JWT_SECRET as string || "qwerty123";
        const saltRound : number = parseInt(process.env.SALT_ROUND as string) || 12;
        const bucketName : string = process.env.AWS_BUCKET_NAME as string || "ecommerce--bucket";

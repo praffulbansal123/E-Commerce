@@ -2,6 +2,10 @@ import User, { IUserModel } from '../models/userModel';
 import createError from 'http-errors';
 import axios from 'axios';
 import { uploadFile } from '../providers/aws';
+import bcrypt from 'bcrypt'
+import jwt, { JwtPayload } from 'jsonwebtoken'
+import Locals from '../config/config';
+import { Types } from 'mongoose';
 
 /*
 * @author Prafful Bansal
@@ -78,5 +82,214 @@ export const createUser = async (input: any, image: any) => {
         return user
     } catch (error : any) {
       throw error
+    }
+}
+
+/*
+* @author Prafful Bansal
+* @description Service for login
+*/
+export const loginUser = async (input: any) : Promise<any> => {
+
+    try {
+        
+        const user : any = await User.findOne({email: input.email});
+
+        if(!user){
+            throw new createError.NotFound(`${input.email} does not exist`);
+        }
+
+        // comparing password
+        const isPasswordMatch = await bcrypt.compare(input.password, user.password);
+        // const isPasswordMatch = await user.comparePassword(input.password, user.password);
+
+        if(!isPasswordMatch){
+            throw new createError.NotAcceptable('Invalid Password')
+        }
+
+        // JWT logic
+        const payload = {
+            userId : user._id.toString()
+        }
+    
+        const secret : string = Locals.config().jwtSecret
+        const expiry = {expiresIn : Locals.config().jwtExpiration}
+    
+        const token = jwt.sign(payload, secret, expiry)
+            
+        // masking user password and role
+        user.password = undefined;
+        
+        const obj =   {token: token, user : user}
+
+        return obj
+
+    } catch (error : any) {
+        throw error
+    }
+    
+}
+
+/*
+* @author Prafful Bansal
+* @description Service for getting user details
+*/
+export const getUserDetails = async (input: Types.ObjectId, payload: JwtPayload) : Promise<any> => {
+    try {
+        
+        if(input !== payload.userId)
+            throw new createError.Unauthorized('User is not authorized for this resource')
+        
+        const user = await User.findById(input)
+
+        if(!user)
+            throw new createError.BadRequest(`No user exits with ID: ${input}`)
+        
+        return user
+
+    } catch (error : any) {
+        throw error
+    }
+}
+
+/*
+* @author Prafful Bansal
+* @description Service for updating user details
+*/
+export const updateUser = async (requestBody: any, image: any, userId: Types.ObjectId) : Promise<any> => {
+    try {
+        const updates: any = {}
+
+        const user = await User.findById(userId)
+
+        if(!user)
+            throw new createError.BadRequest(`No user exits with ID: ${userId}`)
+        
+        if(image.length>=2)
+            throw new createError.BadRequest("Only one profile picture is allowed")
+        
+        if(image.length>0){
+            // Regex for validating image
+            const regexForMimeTypes = /image\/png|image\/jpeg|image\/jpg/;
+        
+            // Validating image format
+            if(!regexForMimeTypes.test(image[0].mimetype))
+                throw new createError.BadRequest('Invalid image format')
+        
+            // Uploading profile image to AWS_S3
+            const profileImage = await uploadFile(image[0])
+
+            updates.profileImage = profileImage
+        }
+
+        const {fname, lname, email, phone, password, address} = requestBody
+
+        if(fname){
+            if(fname !== user.fname)
+                updates.fname = fname
+            
+            else throw new createError.BadRequest(`Provide a new first name as ${fname} is already upto date`)   
+        }
+        
+        if(lname && lname !== user.lname)
+            updates.lname = lname
+        
+        if(email && email !== user.email){
+            const notUniqueEmail = await User.findOne({email: email})
+
+            if(notUniqueEmail)
+                throw new createError.BadRequest(`Please provide another email as email: ${email} already exits`)
+
+            updates.email = email
+        }
+
+        if(phone && phone !== user.phone){
+            const notUniqueEmail = await User.findOne({phone: phone})
+
+            if(notUniqueEmail)
+                throw new createError.BadRequest(`Please provide another phone as phone: ${phone} already exits`)
+
+            updates.phone = phone
+        }
+
+        if(password){
+            const compareOldPassword = await bcrypt.compare(password, user.password)
+
+            if(compareOldPassword)
+                throw new createError.BadRequest('Can not update same password')
+
+            const salt = bcrypt.genSaltSync(Locals.config().saltRound);
+            const hashedPassword = await bcrypt.hash(password, salt)
+
+            updates.password = hashedPassword
+        }
+
+        if(address){
+            const {shipping, billing} = address
+            if(Object.keys(shipping).length>0){
+
+                const { street, city, pincode } = shipping
+
+                if(street) updates["address.shipping.street"] = street
+                
+                if(pincode === user.address.shipping.pincode)
+                    throw new createError.BadRequest('Can not update old pincode')
+
+                //Matching pincode and city by axios call for billing
+                const options = {
+                    method: "GET",
+                    url: `https://api.postalpincode.in/pincode/${pincode}`,
+                };
+
+                const pincodeDetail = await axios(options);
+
+                if (pincodeDetail.data[0].PostOffice === null)
+                    throw new createError.BadRequest('Invalid pin code provided')
+
+                const cityNameByPinCode = pincodeDetail.data[0].PostOffice[0].District;
+
+                if(cityNameByPinCode !== city)
+                    throw new createError.BadRequest(`Invalid billing address as ${pincode} does not matches ${city}`)
+                
+                updates["address.shipping.city"] = cityNameByPinCode
+                updates["address.shipping.pincode"] = pincode
+            }
+            if(billing){
+                const { street, city, pincode } = billing
+                if(street) updates["address.billing.street"] = street
+
+                if(pincode === user.address.billing.pincode)
+                    throw new createError.BadRequest('Can not update old pincode')
+
+                //Matching pincode and city by axios call for billing
+                const options = {
+                    method: "GET",
+                    url: `https://api.postalpincode.in/pincode/${pincode}`,
+                };
+
+                const pincodeDetail = await axios(options);
+
+                if (pincodeDetail.data[0].PostOffice === null)
+                    throw new createError.BadRequest('Invalid pin code provided')
+
+                const cityNameByPinCode = pincodeDetail.data[0].PostOffice[0].District;
+
+                if(cityNameByPinCode !== city)
+                    throw new createError.BadRequest(`Invalid billing address as ${pincode} does not matches ${city}`)
+                
+                updates["address.billing.street"] = cityNameByPinCode
+                updates["address.billing.street"] = pincode
+            }
+        }
+
+        if (Object.keys(updates).length === 0)
+            throw new createError.BadRequest("Nothing to update")
+
+        const updatedProfile = await User.findByIdAndUpdate({ _id: userId }, { $set: updates }, { new: true });
+
+        return updatedProfile
+        
+    } catch (error : any) {
+        throw error
     }
 }
