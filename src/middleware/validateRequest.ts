@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../logger/logger';
 import { registerUserSchema, loginUserSchema, updateUserSchema} from '../schemas/userJoiSchema'
+import {createProductSchema, getProductSchema} from '../schemas/productJoiSchema'
 
 
 /*
@@ -13,13 +14,21 @@ const formDataValidator = (req : Request, next : NextFunction, schema : any) => 
         allowUnknown: true, // ignore unknown props
         stripUnknown: true // remove unknown props
     };
-
-    let requestBody = {...req.body}
+    
+    let requestBody = {...req.body, ...req.query}
     
     if(requestBody.address) {
         requestBody.address = JSON.parse(requestBody.address);
     }
     
+    if(requestBody.availableSizes) {
+        requestBody.availableSizes = JSON.parse(requestBody.availableSizes);
+    }
+
+    if(requestBody.size){
+        requestBody.size = JSON.parse(requestBody.size);
+    }
+
     const { error, value } = schema.validate(requestBody, options);
     if (error) {
         logger.info(error)
@@ -61,4 +70,14 @@ export const loginSchema = (req: Request, res: Response, next : NextFunction) =>
 export const updateSchema = (req: Request, res: Response, next : NextFunction) => {
     const schema = updateUserSchema
     formDataValidator(req, next, schema);
+}
+
+export const productCreateSchema = (req: Request, res: Response, next : NextFunction) => {
+    const schema = createProductSchema
+    formDataValidator(req, next, schema)
+}
+
+export const productGetSchema = (req: Request, res: Response, next : NextFunction) => {
+    const schema = getProductSchema
+    formDataValidator(req, next, schema)
 }

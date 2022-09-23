@@ -5,8 +5,25 @@ import Locals from "../config/config";
 import mongooseUniqueValidator from 'mongoose-unique-validator';
 
 export interface IUserModel extends IUser, Document {
-    comparePassword(password: string, cb : any): string;
+    comparePassword(password: string): Promise<boolean>;
 }
+
+export const shippingSchema: Schema = new Schema({
+    street: {type: String},
+    city: {type: String},
+    pincode: {type: Number},
+})
+
+export const billingSchema: Schema = new Schema({
+    street: {type: String},
+    city: {type: String},
+    pincode: {type: Number},
+})
+
+export const addressSchema: Schema = new Schema({
+    shipping: [shippingSchema],
+    biling: [billingSchema]
+})
 
 
 export const userSchema : Schema = new Schema({
@@ -16,23 +33,12 @@ export const userSchema : Schema = new Schema({
     profileImage: {type: String},
     phone: {type: String, unique: true}, 
     password: {type: String},
-    address: {
-        shipping: {
-            street: {type: String},
-            city: {type: String},
-            pincode: {type: Number},
-        },
-        billing: {
-            street: {type: String},
-            city: {type: String},
-            pincode: {type: String},
-        }
-    },
+    address: [addressSchema],
 }, {timestamps : true})
 
 // password hashing function
 userSchema.pre<IUserModel>('save', async function (next) {
-    const user = this;
+    const user = this as IUserModel
     if(!user.isModified('password')) {
         return next();
     }
@@ -47,10 +53,9 @@ userSchema.pre<IUserModel>('save', async function (next) {
 });
 
 // compare password function
-userSchema.methods.comparePassword = function (requestPassword: string, cb : any) : any {
-    bcrypt.compare(requestPassword, this.password, (err, isMatch) => {
-        return cb(err, isMatch);
-    })
+userSchema.methods.comparePassword = function (requestPassword: string) : any {
+    const user = this as IUserModel
+    return bcrypt.compare(requestPassword, user.password).catch((error) => false)
 };
 
 // unique fields validation

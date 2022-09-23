@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import logger from '../logger/logger';
 import { createUser, loginUser, getUserDetails, updateUser } from '../services/userService';
 import { IUserModel } from '../models/userModel';
+import {IRequest} from '../interface/requestInterface'
 
 /*
 * @author Prafful Bansal

@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import MongoStore from 'connect-mongo';
 import Database from './database/db';
 import userRouter from './routes/userRoutes';
+import productRouter from './routes/productRoutes';
 import multer from 'multer';
 import Locals from './config/config';
 
@@ -54,6 +55,9 @@ Database.init();
 
 // diverting user request to user router
 app.use("/user", userRouter);
+
+// diverting product request to product router
+app.use("/product", productRouter);
 
 // checking invalid route
 app.use((req, res, next) => {

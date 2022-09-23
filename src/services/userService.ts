@@ -11,43 +11,42 @@ import { Types } from 'mongoose';
 * @author Prafful Bansal
 * @description Service for creating new users
 */
-export const createUser = async (input: any, image: any) => {
+
+const validatePincode = async (input: number): Promise<any> => {
+    try {
+        const options = {
+            method: "GET",
+            url: `https://api.postalpincode.in/pincode/${input}`,
+        };
+        
+        const pincodeDetail = await axios(options);
+
+        if (pincodeDetail.data[0].PostOffice === null)
+                throw new createError.BadRequest('Invalid pin code provided')
+    
+        const cityNameByPinCode = pincodeDetail.data[0].PostOffice[0].District;
+    
+        return cityNameByPinCode
+    } catch (error: any) {
+        throw error
+    }
+}
+
+export const createUser = async (input: any, image: any): Promise<any> => {
     try {
 
         // Destructuring address
         const { shipping, billing } = input.address;
 
-        //Matching pincode and city by axios call for shipping
-        const options = {
-            method: "GET",
-            url: `https://api.postalpincode.in/pincode/${shipping.pincode}`,
-        };
-
-        const pincodeDetail = await axios(options);
-
-        if (pincodeDetail.data[0].PostOffice === null)
-            throw new createError.BadRequest('Invalid pin code provided')
-
-        const cityNameByPinCode = pincodeDetail.data[0].PostOffice[0].District;
-
+        const cityNameByPinCode = await validatePincode(shipping.pincode)
+        
         if(cityNameByPinCode !== shipping.city)
             throw new createError.BadRequest(`Invalid shipping address as ${shipping.pincode} does not matches ${shipping.city}`)
-        
+
         // Checking if shipping and billing address are same
         if(shipping.street !== billing.street || shipping.city !== billing.city || shipping.pincode !== billing.pincode){
 
-            //Matching pincode and city by axios call for billing
-            const options = {
-                method: "GET",
-                url: `https://api.postalpincode.in/pincode/${billing.pincode}`,
-            };
-
-            const pincodeDetail = await axios(options);
-
-            if (pincodeDetail.data[0].PostOffice === null)
-                throw new createError.BadRequest('Invalid pin code provided')
-
-            const cityNameByPinCode = pincodeDetail.data[0].PostOffice[0].District;
+            const cityNameByPinCode = await validatePincode(billing.pincode)
 
             if(cityNameByPinCode !== billing.city)
                 throw new createError.BadRequest(`Invalid billing address as ${billing.pincode} does not matches ${billing.city}`)
@@ -76,7 +75,7 @@ export const createUser = async (input: any, image: any) => {
         // Creating user
         const user : IUserModel = await User.create(input)
 
-        // masking password 
+        // // masking password 
         // user.password = undefined;
 
         return user
@@ -100,8 +99,7 @@ export const loginUser = async (input: any) : Promise<any> => {
         }
 
         // comparing password
-        const isPasswordMatch = await bcrypt.compare(input.password, user.password);
-        // const isPasswordMatch = await user.comparePassword(input.password, user.password);
+        const isPasswordMatch = await user.comparePassword(input.password);
 
         if(!isPasswordMatch){
             throw new createError.NotAcceptable('Invalid Password')
@@ -235,18 +233,7 @@ export const updateUser = async (requestBody: any, image: any, userId: Types.Obj
                 if(pincode === user.address.shipping.pincode)
                     throw new createError.BadRequest('Can not update old pincode')
 
-                //Matching pincode and city by axios call for billing
-                const options = {
-                    method: "GET",
-                    url: `https://api.postalpincode.in/pincode/${pincode}`,
-                };
-
-                const pincodeDetail = await axios(options);
-
-                if (pincodeDetail.data[0].PostOffice === null)
-                    throw new createError.BadRequest('Invalid pin code provided')
-
-                const cityNameByPinCode = pincodeDetail.data[0].PostOffice[0].District;
+                const cityNameByPinCode = await validatePincode(pincode)
 
                 if(cityNameByPinCode !== city)
                     throw new createError.BadRequest(`Invalid billing address as ${pincode} does not matches ${city}`)
@@ -261,18 +248,7 @@ export const updateUser = async (requestBody: any, image: any, userId: Types.Obj
                 if(pincode === user.address.billing.pincode)
                     throw new createError.BadRequest('Can not update old pincode')
 
-                //Matching pincode and city by axios call for billing
-                const options = {
-                    method: "GET",
-                    url: `https://api.postalpincode.in/pincode/${pincode}`,
-                };
-
-                const pincodeDetail = await axios(options);
-
-                if (pincodeDetail.data[0].PostOffice === null)
-                    throw new createError.BadRequest('Invalid pin code provided')
-
-                const cityNameByPinCode = pincodeDetail.data[0].PostOffice[0].District;
+                const cityNameByPinCode = await validatePincode(pincode)
 
                 if(cityNameByPinCode !== city)
                     throw new createError.BadRequest(`Invalid billing address as ${pincode} does not matches ${city}`)
