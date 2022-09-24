@@ -1,14 +1,9 @@
-import { ObjectSchema } from "joi";
 import Product from '../models/productModel';
 import IProduct from "../interface/product"
 import createError from 'http-errors';
 import { uploadFile } from '../providers/aws';
 
-export interface IInput extends ObjectSchema {
-    productImage: string | undefined;
-}
-
-export const createProductService = async (input: IInput, image: any) => {
+export const createProductService = async (input: IProduct, image: any) => {
     try {
         // Checking for profile image
         if(image.length === 0 || !image)

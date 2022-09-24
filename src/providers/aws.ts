@@ -28,8 +28,6 @@ export const uploadFile = async (file: any) => {
       if (err) {
         return reject({ error: err });
       }
-      console.log(" file uploaded successfully ");
-      console.log(data);
       return resolve(data.Location);
     });
   });

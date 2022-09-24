@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
 import logger from '../logger/logger';
 import { createUser, loginUser, getUserDetails, updateUser } from '../services/userService';
 import { IUserModel } from '../models/userModel';
-import {IRequest} from '../interface/requestInterface'
+import { JwtPayload } from 'jsonwebtoken';
 
 /*
 * @author Prafful Bansal
@@ -43,7 +43,7 @@ export const loginHandler = async (req: any, res: any, next: NextFunction): Prom
 
         res.header('Authorization', 'Bearer ' + login.token)
 
-        return res.status(200).send({status: true, message: 'User Login Successfull', data: {userId: login.user._id, token: login.token}})
+        return res.status(200).send({status: true, message: 'User Login Successfull', data: {user: login.user._id, token: login.token}})
        
     } catch (error : any) {
         logger.info(error.message);
@@ -59,10 +59,10 @@ export const loginHandler = async (req: any, res: any, next: NextFunction): Prom
 export const getUserDetailsHandler = async (req: any, res: Response, next : NextFunction) => {
     try {
         
-        const payload = req.decodedToken
-        const userId = req.params.userId
+        const payload: JwtPayload = req.decodedToken
+        const userId: Types.ObjectId = req.params.userId
 
-        const user : IUserModel = await getUserDetails(userId, payload)
+        const user = await getUserDetails(userId, payload)
 
         return res.status(200).send({status: true, message: 'User profile details fecthed', data: user})
 

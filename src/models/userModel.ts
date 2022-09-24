@@ -12,18 +12,18 @@ export const shippingSchema: Schema = new Schema({
     street: {type: String},
     city: {type: String},
     pincode: {type: Number},
-})
+}, {_id: false})
 
 export const billingSchema: Schema = new Schema({
     street: {type: String},
     city: {type: String},
     pincode: {type: Number},
-})
+}, {_id: false})
 
 export const addressSchema: Schema = new Schema({
-    shipping: [shippingSchema],
-    biling: [billingSchema]
-})
+    shipping: shippingSchema,
+    billing: billingSchema,
+}, {_id: false})
 
 
 export const userSchema : Schema = new Schema({
@@ -33,7 +33,7 @@ export const userSchema : Schema = new Schema({
     profileImage: {type: String},
     phone: {type: String, unique: true}, 
     password: {type: String},
-    address: [addressSchema],
+    address: addressSchema,
 }, {timestamps : true})
 
 // password hashing function

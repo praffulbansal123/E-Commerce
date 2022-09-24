@@ -3,9 +3,11 @@ import createError from 'http-errors';
 import axios from 'axios';
 import { uploadFile } from '../providers/aws';
 import bcrypt from 'bcrypt'
-import jwt, { JwtPayload } from 'jsonwebtoken'
+import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
 import Locals from '../config/config';
 import { Types } from 'mongoose';
+import {omit} from 'lodash'
+import IUser from '../interface/user'
 
 /*
 * @author Prafful Bansal
@@ -23,8 +25,9 @@ const validatePincode = async (input: number): Promise<any> => {
 
         if (pincodeDetail.data[0].PostOffice === null)
                 throw new createError.BadRequest('Invalid pin code provided')
-    
+        
         const cityNameByPinCode = pincodeDetail.data[0].PostOffice[0].District;
+        console.log(cityNameByPinCode)
     
         return cityNameByPinCode
     } catch (error: any) {
@@ -32,7 +35,7 @@ const validatePincode = async (input: number): Promise<any> => {
     }
 }
 
-export const createUser = async (input: any, image: any): Promise<any> => {
+export const createUser = async (input: IUser, image: any): Promise<any> => {
     try {
 
         // Destructuring address
@@ -70,15 +73,12 @@ export const createUser = async (input: any, image: any): Promise<any> => {
         const profileImage = await uploadFile(image[0])
         
         // Adding profileImage link 
-        input.profileImage = profileImage
+        input.profileImage = profileImage as string
 
         // Creating user
         const user : IUserModel = await User.create(input)
-
-        // // masking password 
-        // user.password = undefined;
-
-        return user
+        
+        return omit(user.toJSON(), "password")
     } catch (error : any) {
       throw error
     }
@@ -106,19 +106,16 @@ export const loginUser = async (input: any) : Promise<any> => {
         }
 
         // JWT logic
-        const payload = {
+        const payload: JwtPayload = {
             userId : user._id.toString()
         }
     
-        const secret : string = Locals.config().jwtSecret
-        const expiry = {expiresIn : Locals.config().jwtExpiration}
+        const secret: string = Locals.config().jwtSecret
+        const expiry: SignOptions | undefined = {expiresIn : Locals.config().jwtExpiration as string}
     
-        const token = jwt.sign(payload, secret, expiry)
-            
-        // masking user password and role
-        user.password = undefined;
+        const token: string = jwt.sign(payload, secret, expiry)
         
-        const obj =   {token: token, user : user}
+        const obj = {token: token, user : omit(user.toJSON(), "password")}
 
         return obj
 
@@ -134,7 +131,7 @@ export const loginUser = async (input: any) : Promise<any> => {
 */
 export const getUserDetails = async (input: Types.ObjectId, payload: JwtPayload) : Promise<any> => {
     try {
-        
+        console.log(input)
         if(input !== payload.userId)
             throw new createError.Unauthorized('User is not authorized for this resource')
         
@@ -143,7 +140,7 @@ export const getUserDetails = async (input: Types.ObjectId, payload: JwtPayload)
         if(!user)
             throw new createError.BadRequest(`No user exits with ID: ${input}`)
         
-        return user
+        return omit(user.toJSON(), "password")
 
     } catch (error : any) {
         throw error
@@ -202,9 +199,9 @@ export const updateUser = async (requestBody: any, image: any, userId: Types.Obj
         }
 
         if(phone && phone !== user.phone){
-            const notUniqueEmail = await User.findOne({phone: phone})
+            const notUniquePhone = await User.findOne({phone: phone})
 
-            if(notUniqueEmail)
+            if(notUniquePhone)
                 throw new createError.BadRequest(`Please provide another phone as phone: ${phone} already exits`)
 
             updates.phone = phone
@@ -224,10 +221,9 @@ export const updateUser = async (requestBody: any, image: any, userId: Types.Obj
 
         if(address){
             const {shipping, billing} = address
-            if(Object.keys(shipping).length>0){
-
+            if(shipping){
                 const { street, city, pincode } = shipping
-
+                
                 if(street) updates["address.shipping.street"] = street
                 
                 if(pincode === user.address.shipping.pincode)
@@ -236,15 +232,18 @@ export const updateUser = async (requestBody: any, image: any, userId: Types.Obj
                 const cityNameByPinCode = await validatePincode(pincode)
 
                 if(cityNameByPinCode !== city)
-                    throw new createError.BadRequest(`Invalid billing address as ${pincode} does not matches ${city}`)
+                throw new createError.BadRequest(`Invalid billing address as ${pincode} does not matches ${city}`)
                 
                 updates["address.shipping.city"] = cityNameByPinCode
                 updates["address.shipping.pincode"] = pincode
             }
             if(billing){
                 const { street, city, pincode } = billing
-                if(street) updates["address.billing.street"] = street
 
+                console.log(street, city, pincode)
+                if(street) 
+                    updates["address.billing.street"] = street
+                   
                 if(pincode === user.address.billing.pincode)
                     throw new createError.BadRequest('Can not update old pincode')
 
@@ -253,17 +252,17 @@ export const updateUser = async (requestBody: any, image: any, userId: Types.Obj
                 if(cityNameByPinCode !== city)
                     throw new createError.BadRequest(`Invalid billing address as ${pincode} does not matches ${city}`)
                 
-                updates["address.billing.street"] = cityNameByPinCode
-                updates["address.billing.street"] = pincode
+                updates["address.billing.city"] = cityNameByPinCode
+                updates["address.billing.pincode"] = pincode
             }
         }
 
-        if (Object.keys(updates).length === 0)
+        if(Object.keys(updates).length === 0)
             throw new createError.BadRequest("Nothing to update")
 
-        const updatedProfile = await User.findByIdAndUpdate({ _id: userId }, { $set: updates }, { new: true });
+        const updatedProfile = await User.findByIdAndUpdate({ _id: userId }, { $set: updates }, { new: true }) as IUserModel;
 
-        return updatedProfile
+        return omit(updatedProfile.toJSON(), "password")
         
     } catch (error : any) {
         throw error
