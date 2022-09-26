@@ -1,5 +1,5 @@
 import {Schema, model} from "mongoose";
-import IProduct from "../interface/product"
+import IProduct from "../interface/models/product"
 import mongooseUniqueValidator from "mongoose-unique-validator";
 
 export const productSchema : Schema = new Schema({

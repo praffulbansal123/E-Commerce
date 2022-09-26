@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler} from 'express';
-import mongoose, { Types } from 'mongoose';
+import mongoose from 'mongoose';
+import { IFiles } from '../interface/vendors/files';
+import ProductUpdate from '../interface/vendors/productUpdate';
 import logger from '../logger/logger';
 import {createProductService, getProductService, getProductByIdService, updatePoductService, deleteProductService} from '../services/productService'
 
@@ -51,9 +53,9 @@ export const getProductByIdHandler:RequestHandler = async (req: Request, res: Re
 
 export const updateProductHandler: RequestHandler = async (req: Request, res: Response, next : NextFunction) => {
     try {
-        const productId = req.params.productId
-        const requestBody = req.body
-        const image = req.files
+        const productId:string = req.params.productId
+        const requestBody:ProductUpdate = req.body
+        const image:IFiles = req.files
         
         const updatedPoduct = await updatePoductService(productId, requestBody, image)
 

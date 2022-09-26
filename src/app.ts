@@ -9,6 +9,7 @@ import MongoStore from 'connect-mongo';
 import Database from './database/db';
 import userRouter from './routes/userRoutes';
 import productRouter from './routes/productRoutes';
+import cartRouter from './routes/cartRoutes'
 import multer from 'multer';
 import Locals from './config/config';
 
@@ -58,6 +59,9 @@ app.use("/user", userRouter);
 
 // diverting product request to product router
 app.use("/product", productRouter);
+
+// diverting cart request to cart router
+app.use("/cart", cartRouter);
 
 // checking invalid route
 app.use((req, res, next) => {

@@ -7,15 +7,17 @@ import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
 import Locals from '../config/config';
 import { Types } from 'mongoose';
 import {omit} from 'lodash'
-import IUser from '../interface/user'
-import ApiError from '../interface/vendors/errorInterface';
+import IUser from '../interface/models/user'
+import { IFiles } from '../interface/vendors/files';
+import Cart from '../models/cartModel';
+import ICart from '../interface/models/cart';
+import {IEmptyCart} from '../interface/vendors/IEmptyCart'
 
 /*
 * @author Prafful Bansal
 * @description Service for creating new users
 */
-
-const validatePincode = async (input: number): Promise<any> => {
+const validatePincode = async (input: number): Promise<string> => {
     try {
         const options = {
             method: "GET",
@@ -27,8 +29,7 @@ const validatePincode = async (input: number): Promise<any> => {
         if (pincodeDetail.data[0].PostOffice === null)
                 throw new createError.BadRequest('Invalid pin code provided')
         
-        const cityNameByPinCode = pincodeDetail.data[0].PostOffice[0].District;
-        console.log(cityNameByPinCode)
+        const cityNameByPinCode:string = pincodeDetail.data[0].PostOffice[0].District;
     
         return cityNameByPinCode
     } catch (error: any) {
@@ -36,7 +37,7 @@ const validatePincode = async (input: number): Promise<any> => {
     }
 }
 
-export const createUser = async (input: IUser, image: any): Promise<any> => {
+export const createUser = async (input: IUser, image: IFiles): Promise<any> => {
     try {
 
         // Destructuring address
@@ -78,7 +79,18 @@ export const createUser = async (input: IUser, image: any): Promise<any> => {
 
         // Creating user
         const user : IUserModel = await User.create(input)
-        
+
+        // Creating cart for individual user
+        const newCartData: IEmptyCart = {
+            userId: user._id,
+            items: [],
+            totalPrice: 0,
+            totalItems: 0
+        }
+        console.log(newCartData)
+
+        const newCart:ICart = await Cart.create(newCartData)
+
         return omit(user.toJSON(), "password")
     } catch (error : any) {
       throw error

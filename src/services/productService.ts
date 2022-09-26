@@ -1,11 +1,12 @@
 import Product from '../models/productModel';
-import IProduct from "../interface/product"
+import IProduct from "../interface/models/product"
 import createError from 'http-errors';
 import { uploadFile } from '../providers/aws';
 import {Types} from 'mongoose';
 import ProductUpdate from '../interface/vendors/productUpdate';
+import { IFiles } from '../interface/vendors/files';
 
-export const createProductService = async (input: IProduct, image: any) => {
+export const createProductService = async (input: IProduct, image: IFiles) => {
     try {
         // Checking for profile image
         if(image.length === 0 || !image)
@@ -87,7 +88,7 @@ export const getProductByIdService = async (input: string): Promise<IProduct> =>
     }
 }
 
-export const updatePoductService = async (productId:string, requestBody:ProductUpdate, image:any): Promise<IProduct> => {
+export const updatePoductService = async (productId:string, requestBody:ProductUpdate, image:IFiles): Promise<IProduct> => {
     try {
         if(!Types.ObjectId.isValid(productId))
             throw new createError.BadRequest('Please provide a valid input ID')
@@ -103,7 +104,7 @@ export const updatePoductService = async (productId:string, requestBody:ProductU
         if(image && image.length>0){
             // Regex for validating image
             const regexForMimeTypes = /image\/png|image\/jpeg|image\/jpg/;
-            console.log(1)
+
             // Validating image format
             if(!regexForMimeTypes.test(image[0].mimetype))
                 throw new createError.BadRequest('Invalid image format')
@@ -169,7 +170,7 @@ export const deleteProductService = async (input: string): Promise<IProduct> => 
         if(!Types.ObjectId.isValid(input))
             throw new createError.BadRequest('Please provide a valid input ID')
         
-        const product = await Product.findById({ _id: input, isDeleted: false}) as IProduct
+        const product:IProduct|null = await Product.findById({ _id: input, isDeleted: false})
 
         if(!product)
             throw new createError.NotFound(`No product exits with ID: ${input} or it has been deleted`)

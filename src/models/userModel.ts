@@ -1,5 +1,5 @@
 import {Schema, Document, model} from "mongoose";
-import IUser from "../interface/user";
+import IUser from "../interface/models/user";
 import bcrypt from 'bcrypt';
 import Locals from "../config/config";
 import mongooseUniqueValidator from 'mongoose-unique-validator';
