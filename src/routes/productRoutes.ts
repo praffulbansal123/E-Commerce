@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { productCreateSchema, productGetSchema } from '../middleware/validateRequest';
+import { productCreateSchema, productGetSchema, productUpdateSchema } from '../middleware/validateRequest';
 import * as ProductController from '../controller/productControllerr';
 
 const router : Router  = express.Router();
@@ -9,5 +9,14 @@ router.post('/create', productCreateSchema, ProductController.createProductHandl
 
 // Fetched products with filter conditions
 router.get('/get', productGetSchema, ProductController.getProductHandler)
+
+// Get product by productId
+router.get('/get/:productId', ProductController.getProductByIdHandler )
+
+// Update product route
+router.put('/update/:productId', productUpdateSchema, ProductController.updateProductHandler)
+
+// Deletre product route
+router.delete('/delete/:productId', ProductController.deleteProductHandler)
 
 export default router;

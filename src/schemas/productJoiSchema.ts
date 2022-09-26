@@ -26,3 +26,16 @@ export const getProductSchema: ObjectSchema = Joi.object({
     priceLessThan: Joi.number(),
     priceSort: Joi.number().valid(1,-1)
 })
+
+export const updateProductSchema: ObjectSchema = Joi.object({
+    title: Joi.string().trim(),
+    description: Joi.string().trim(),
+    price: Joi.number().min(0).precision(2),
+    currencyId: Joi.string().valid('INR', 'GBP'),
+    currencyFormat: Joi.string().trim(),
+    isFreeShipping: Joi.boolean().default(false),
+    productImage: Joi.string().trim(),
+    style: Joi.string(),
+    availableSizes: Joi.array().items(Joi.string().valid("S", "XS","M","X", "L","XXL", "XL")).min(1),
+    installments: Joi.number(),
+})

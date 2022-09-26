@@ -8,6 +8,7 @@ import Locals from '../config/config';
 import { Types } from 'mongoose';
 import {omit} from 'lodash'
 import IUser from '../interface/user'
+import ApiError from '../interface/vendors/errorInterface';
 
 /*
 * @author Prafful Bansal
@@ -107,7 +108,7 @@ export const loginUser = async (input: any) : Promise<any> => {
 
         // JWT logic
         const payload: JwtPayload = {
-            userId : user._id.toString()
+            userId : user._id.toString() as string
         }
     
         const secret: string = Locals.config().jwtSecret
@@ -115,7 +116,7 @@ export const loginUser = async (input: any) : Promise<any> => {
     
         const token: string = jwt.sign(payload, secret, expiry)
         
-        const obj = {token: token, user : omit(user.toJSON(), "password")}
+        const obj = {token: token, user : omit(user.toJSON(), "password") as IUserModel}
 
         return obj
 
@@ -129,13 +130,12 @@ export const loginUser = async (input: any) : Promise<any> => {
 * @author Prafful Bansal
 * @description Service for getting user details
 */
-export const getUserDetails = async (input: Types.ObjectId, payload: JwtPayload) : Promise<any> => {
+export const getUserDetails = async (input: string, payload: JwtPayload) : Promise<any> => {
     try {
-        console.log(input)
         if(input !== payload.userId)
             throw new createError.Unauthorized('User is not authorized for this resource')
         
-        const user = await User.findById(input)
+        const user = await User.findById(input) as IUserModel
 
         if(!user)
             throw new createError.BadRequest(`No user exits with ID: ${input}`)
@@ -151,7 +151,7 @@ export const getUserDetails = async (input: Types.ObjectId, payload: JwtPayload)
 * @author Prafful Bansal
 * @description Service for updating user details
 */
-export const updateUser = async (requestBody: any, image: any, userId: Types.ObjectId) : Promise<any> => {
+export const updateUser = async (requestBody: any, image: any, userId: String) : Promise<any> => {
     try {
         const updates: any = {}
 

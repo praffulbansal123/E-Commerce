@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction} from 'express';
-import mongoose from 'mongoose';
+import { Request, Response, NextFunction, RequestHandler} from 'express';
+import mongoose, { Types } from 'mongoose';
 import logger from '../logger/logger';
-import {createProductService, getProductService} from '../services/productService'
+import {createProductService, getProductService, getProductByIdService, updatePoductService, deleteProductService} from '../services/productService'
 
 
 export const createProductHandler = async (req: Request, res: Response, next : NextFunction) => {
@@ -36,3 +36,45 @@ export const getProductHandler = async (req: Request, res: Response, next : Next
     }
 }
 
+export const getProductByIdHandler:RequestHandler = async (req: Request, res: Response, next : NextFunction) => {
+    try {
+        const productId:string = req.params.productId
+
+        const product = await getProductByIdService(productId)
+
+        return res.status(200).send({status: true, message: 'Product Details Fetched', data: product})
+    } catch (error : any) {
+        logger.info(error.message);
+        next(error);
+    }
+}
+
+export const updateProductHandler: RequestHandler = async (req: Request, res: Response, next : NextFunction) => {
+    try {
+        const productId = req.params.productId
+        const requestBody = req.body
+        const image = req.files
+        
+        const updatedPoduct = await updatePoductService(productId, requestBody, image)
+
+        return res.status(200).send({status: true, message: 'Product Details updated successfully', data: updatedPoduct})
+
+    } catch (error : any) {
+        logger.info(error.message);
+        next(error)
+    }
+}
+
+export const deleteProductHandler: RequestHandler = async (req: Request, res: Response, next : NextFunction) => {
+    try {
+        const productId = req.params.productId
+
+        const deletedProduct = await deleteProductService(productId)
+
+        return res.status(200).send({status: true, message: 'Product deleted successfully', data: deletedProduct})
+
+    } catch (error : any) {
+        logger.info(error.message);
+        next(error)
+    }
+}

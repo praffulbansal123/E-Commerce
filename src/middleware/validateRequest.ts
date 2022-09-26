@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../logger/logger';
 import { registerUserSchema, loginUserSchema, updateUserSchema} from '../schemas/userJoiSchema'
-import {createProductSchema, getProductSchema} from '../schemas/productJoiSchema'
+import {createProductSchema, getProductSchema, updateProductSchema} from '../schemas/productJoiSchema'
 
 
 /*
@@ -79,5 +79,10 @@ export const productCreateSchema = (req: Request, res: Response, next : NextFunc
 
 export const productGetSchema = (req: Request, res: Response, next : NextFunction) => {
     const schema = getProductSchema
+    formDataValidator(req, next, schema)
+}
+
+export const productUpdateSchema = (req: Request, res: Response, next : NextFunction) => {
+    const schema = updateProductSchema
     formDataValidator(req, next, schema)
 }

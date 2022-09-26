@@ -1,9 +1,10 @@
 import mongoose, { Types } from 'mongoose';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import logger from '../logger/logger';
 import { createUser, loginUser, getUserDetails, updateUser } from '../services/userService';
 import { IUserModel } from '../models/userModel';
 import { JwtPayload } from 'jsonwebtoken';
+import IRequest from '../interface/vendors/requestInterface';
 
 /*
 * @author Prafful Bansal
@@ -56,11 +57,11 @@ export const loginHandler = async (req: any, res: any, next: NextFunction): Prom
 * @description User login 
 * @route GET user/getUserDetails/:userId
 */
-export const getUserDetailsHandler = async (req: any, res: Response, next : NextFunction) => {
+export const getUserDetailsHandler: RequestHandler = async (req: IRequest, res: Response, next : NextFunction) => {
     try {
         
-        const payload: JwtPayload = req.decodedToken
-        const userId: Types.ObjectId = req.params.userId
+        const payload = req.decodedToken as JwtPayload
+        const userId: string = req.params.userId
 
         const user = await getUserDetails(userId, payload)
 
@@ -77,7 +78,7 @@ export const getUserDetailsHandler = async (req: any, res: Response, next : Next
 * @description User login 
 * @route GET user/updateUser/:userId
 */
-export const updateUserDetailsHandler = async (req: any, res: Response, next : NextFunction) => {
+export const updateUserDetailsHandler: RequestHandler = async (req: IRequest, res: Response, next : NextFunction) => {
     try {
         const userId = req.params.userId
         const requestBody = req.body
