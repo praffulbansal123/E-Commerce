@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import logger from '../logger/logger';
 import { registerUserSchema, loginUserSchema, updateUserSchema} from '../schemas/userJoiSchema'
 import {createProductSchema, getProductSchema, updateProductSchema} from '../schemas/productJoiSchema'
-import {addProductToCartSchema} from '../schemas/cartJoiSchema'
+import {addProductToCartSchema, removeProductFromCartSchema} from '../schemas/cartJoiSchema'
 
 
 /*
@@ -90,5 +90,10 @@ export const productUpdateSchema = (req: Request, res: Response, next : NextFunc
 
 export const addProductSchema = (req: Request, res: Response, next : NextFunction) => {
     const schema = addProductToCartSchema
+    requestValidator(req, next, schema);
+}
+
+export const removeProductSchema = (req: Request, res: Response, next : NextFunction) => {
+    const schema = removeProductFromCartSchema
     requestValidator(req, next, schema);
 }

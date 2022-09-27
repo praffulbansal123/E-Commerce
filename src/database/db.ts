@@ -8,7 +8,7 @@ import Locals from '../config/config'
 */
 class Database {
     // Initialize the database connection
-    public static async init () : Promise<any> {
+    public static async init () : Promise<void> {
         const dsn : string  = Locals.config().mongooseUrl
 
         try {

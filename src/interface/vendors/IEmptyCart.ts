@@ -1,10 +1,10 @@
 import { Types } from "mongoose";
-import { IItems } from "./IItems";
+import { IAddItems } from "./Items";
 
 
 export interface IEmptyCart {
     userId: Types.ObjectId,
-    items: Array<IItems>,
+    items: Array<IAddItems>,
     totalPrice: number,
     totalItems: number,
 }

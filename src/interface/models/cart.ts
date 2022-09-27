@@ -1,9 +1,9 @@
 import { Document, Types } from 'mongoose'
-import { IItems } from '../vendors/IItems';
+import { IAddItems } from '../vendors/Items';
 
 export default interface ICart extends Document{
     userId: Types.ObjectId,
-    items:Array<IItems>,
+    items:Array<IAddItems>,
     totalPrice: number,
     totalItems: number,
 }
