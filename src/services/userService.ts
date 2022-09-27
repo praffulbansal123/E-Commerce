@@ -87,7 +87,6 @@ export const createUser = async (input: IUser, image: IFiles): Promise<any> => {
             totalPrice: 0,
             totalItems: 0
         }
-        console.log(newCartData)
 
         const newCart:ICart = await Cart.create(newCartData)
 

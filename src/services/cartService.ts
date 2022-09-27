@@ -1,5 +1,5 @@
 import IProduct from "../interface/models/product"
-import { CartUpdate, IItems } from "../interface/vendors/IItems"
+import { IItems } from "../interface/vendors/IItems"
 import Product from "../models/productModel"
 import createError from 'http-errors';
 import ICart from "../interface/models/cart";
@@ -18,22 +18,23 @@ export const addProductToCartService = async (userId: string, productInfo: IItem
 
         if(!cartByUserID)
             throw new createError.BadRequest(`No cart exits for user with ID: ${userId}`)
-
-        const update:CartUpdate = {}
         
-        // Adding product to cart
-        cartByUserID.items.push(productInfo)
-        update.items = cartByUserID.items
-        
-        // Updating cart totalPrice
-        update.totalPrice = cartByUserID.totalPrice + (productById.price * productInfo.quantity)
+        // checking whether product exist in cart or not
+        const isProductExistsInCart = cartByUserID.items.filter(
+            (productData) => productData.productId.toString() === productInfo.productId.toString()
+        );
 
-        // Updating cart totalItems
-        update.totalItems = cartByUserID.totalItems + 1
+        if(isProductExistsInCart.length>0){
 
-        const updatedCart = await Cart.findOneAndUpdate({userId: userId}, {$set: update}, {new: true}) as ICart
+            const updatedCart = await Cart.findOneAndUpdate({userId: userId, "items.productId": productInfo.productId},{$inc: {totalPrice: (productById.price * productInfo.quantity), "items.$.quantity": productInfo.quantity}}, {new: true}) as ICart
+            
+            return updatedCart
 
-        return updatedCart
+        } else {
+            const updatedCart = await Cart.findOneAndUpdate({userId: userId}, {$addToSet: {items: productInfo}, $inc: {totalPrice: (productById.price * productInfo.quantity), totalItems: 1}}, {new: true}) as ICart
+            
+            return updatedCart
+        }
         
     } catch (error : any) {
         throw error
