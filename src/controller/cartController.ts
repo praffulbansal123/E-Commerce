@@ -1,4 +1,3 @@
-import { Console } from "console";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import ICart from "../interface/models/cart";
 import { IAddItems, IRemoveItems } from "../interface/vendors/Items";
