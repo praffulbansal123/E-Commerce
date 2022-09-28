@@ -1,11 +1,12 @@
 import IOrder from "../interface/models/order";
 import IProduct from "../interface/models/product";
 import ICart from "../interface/models/cart";
-import { ICreateOrder, IRBOrder } from "../interface/vendors/order";
+import { ICreateOrder, IRBOrder, IStatusOrder } from "../interface/vendors/order";
 import Cart from "../models/cartModel";
 import Product from "../models/productModel";
 import Order from "../models/orderModel";
 import createError from 'http-errors';
+import { Types } from "mongoose";
 
 export const createOrderService = async (input:string, requestBody:IRBOrder): Promise<IOrder> => {
     try {
@@ -62,7 +63,44 @@ export const createOrderService = async (input:string, requestBody:IRBOrder): Pr
         
         return order
         
-    } catch (error) {
+    } catch (error: any) {
+        throw error
+    }
+}
+
+export const orderStatusService = async (userId:string, orderId:string, requestBody:IStatusOrder): Promise<IOrder> => {
+    try {
+        // Destructuring request body
+        const {status} = requestBody
+
+        // Validating type of orderId
+        if(!Types.ObjectId.isValid(orderId))
+            throw new createError.BadRequest('Please provide a valid orderId')
+        
+        // Checking if order exits with given ID
+        const orderByOrderId:IOrder|null = await Order.findOne({_id: orderId, isDeleted: false})
+
+        if(!orderByOrderId)
+            throw new createError.NotFound(`No order exits with ID: ${orderId}`)
+
+        if(orderByOrderId.userId.toString() !== userId)
+            throw new createError.Unauthorized(`Access Denied: Oerde with ID: ${orderId} does not belong to user with ID: ${userId}`)
+        
+        if(orderByOrderId.status === status)
+            throw new createError.BadRequest('Order status is already upto date')
+        
+        if(orderByOrderId.status === 'completed')
+            throw new createError.BadRequest('Can not update order status as it is already completed')
+
+        if(status === 'cancelled' && orderByOrderId.cancellable === false)
+            throw new createError.BadRequest(`Order with ID: ${orderId} can not be cancelled`)
+        
+        // Updating order status
+        const updatedOrderStatus = await Order.findByIdAndUpdate({ _id:orderId}, { $set: {status: status}}, {new: true}) as IOrder
+
+        return updatedOrderStatus
+        
+    } catch (error : any) {
         throw error
     }
 }

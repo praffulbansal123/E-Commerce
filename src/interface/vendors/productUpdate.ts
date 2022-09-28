@@ -1,4 +1,4 @@
-export default interface ProductUpdate{
+export interface IProductUpdate{
     title?: string,
     description?: string,
     price?: number,

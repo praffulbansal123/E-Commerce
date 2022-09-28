@@ -14,7 +14,7 @@ export const addProductToCarthandler:RequestHandler = async (req:Request, res:Re
 
         return res.status(201).send({status: true, message: 'Product added to cart successfully', data: updatedCart})
         
-    } catch (error : any) {
+    } catch (error:any) {
         logger.info(error.message);
         next(error)
     }
@@ -29,7 +29,7 @@ export const removeProductFromCartHandler:RequestHandler = async (req:Request, r
 
         return res.status(200).send({status: true, message: 'Product removed from cart successfully', data: updatedCart})
 
-    } catch (error : any) {
+    } catch (error:any) {
         logger.info(error.message);
         next(error)
     }
@@ -44,7 +44,7 @@ export const getCartDetailsHandler:RequestHandler = async (req:Request, res:Resp
 
         return res.status(200).send({status: true, message: 'Cart details fetched successfully', data: cartDetails})
 
-    } catch (error : any) {
+    } catch (error:any) {
         logger.info(error.message);
         next(error)
     }
@@ -59,7 +59,7 @@ export const emptyCartHandler:RequestHandler = async (req:Request, res:Response,
 
         return res.status(200).send({status: true, message: 'Cart emptied successfully', data: emptyCart})
         
-    } catch (error : any) {
+    } catch (error:any) {
         logger.info(error.message);
         next(error)
     }

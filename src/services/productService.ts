@@ -3,7 +3,7 @@ import IProduct from "../interface/models/product"
 import createError from 'http-errors';
 import { uploadFile } from '../providers/aws';
 import {Types} from 'mongoose';
-import ProductUpdate from '../interface/vendors/productUpdate';
+import { IProductUpdate } from '../interface/vendors/productUpdate';
 import { IFiles } from '../interface/vendors/files';
 
 export const createProductService = async (input: IProduct, image: IFiles) => {
@@ -88,12 +88,12 @@ export const getProductByIdService = async (input: string): Promise<IProduct> =>
     }
 }
 
-export const updatePoductService = async (productId:string, requestBody:ProductUpdate, image:IFiles): Promise<IProduct> => {
+export const updatePoductService = async (productId:string, requestBody:IProductUpdate, image:IFiles): Promise<IProduct> => {
     try {
         if(!Types.ObjectId.isValid(productId))
             throw new createError.BadRequest('Please provide a valid input ID')
 
-        const updates: ProductUpdate = {}
+        const updates:IProductUpdate = {}
 
         
         const product = await Product.findById({_id: productId, isDeleted: false})

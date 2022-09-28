@@ -3,7 +3,7 @@ import logger from '../logger/logger';
 import { registerUserSchema, loginUserSchema, updateUserSchema} from '../schemas/userJoiSchema'
 import {createProductSchema, getProductSchema, updateProductSchema} from '../schemas/productJoiSchema'
 import {addProductToCartSchema, removeProductFromCartSchema} from '../schemas/cartJoiSchema'
-import { createOrderSchema } from '../schemas/orderJoiSchema';
+import { createOrderSchema, orderStstusSchema } from '../schemas/orderJoiSchema';
 
 /*
 * @author Prafful Bansal
@@ -100,5 +100,10 @@ export const removeProductSchema = (req:Request, res:Response, next:NextFunction
 
 export const orderCreateSchema = (req:Request, res:Response, next:NextFunction) => {
     const schema = createOrderSchema
+    requestValidator(req, next, schema);
+}
+
+export const updateOrderStatusSchema = (req:Request, res:Response, next:NextFunction) => {
+    const schema = orderStstusSchema
     requestValidator(req, next, schema);
 }

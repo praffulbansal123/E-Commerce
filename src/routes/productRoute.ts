@@ -1,6 +1,6 @@
 import express, { Router } from 'express';
 import { productCreateSchema, productGetSchema, productUpdateSchema } from '../middleware/validateRequest';
-import * as ProductController from '../controller/productControllerr';
+import * as ProductController from '../controller/productController';
 
 const router : Router  = express.Router();
 

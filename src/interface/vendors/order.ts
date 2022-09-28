@@ -1,14 +1,14 @@
 import { Types } from "mongoose"
 import { IAddItems } from "./Items"
 
-export type IRBOrder = {
+export interface IRBOrder {
     cancellable: boolean,
     status: string,
     deletedAt: Date,
     isDeleted: boolean 
 }
 
-export type ICreateOrder = {
+export interface ICreateOrder {
     userId: Types.ObjectId
     items: Array<IAddItems>,
     totalPrice: number,
@@ -18,4 +18,8 @@ export type ICreateOrder = {
     status: string,
     deletedAt: Date,
     isDeleted: boolean
+}
+
+export interface IStatusOrder {
+    status: string
 }
