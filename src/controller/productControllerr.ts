@@ -69,7 +69,7 @@ export const updateProductHandler: RequestHandler = async (req: Request, res: Re
 
 export const deleteProductHandler: RequestHandler = async (req: Request, res: Response, next : NextFunction) => {
     try {
-        const productId = req.params.productId
+        const productId:string = req.params.productId
 
         const deletedProduct = await deleteProductService(productId)
 

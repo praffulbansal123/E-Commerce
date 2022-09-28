@@ -27,6 +27,7 @@ export const authentication = async (req: any, res: any, next: NextFunction) => 
 
     } catch (error: any) {
         logger.info(error.message);
+        error.status = 401
         next(error)
     }
 }

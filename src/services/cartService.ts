@@ -9,7 +9,7 @@ import { Types } from "mongoose";
 export const addProductToCartService = async (userId:string, productInfo:IAddItems):Promise<ICart> => {
     try {
         // Checking for the valid productId
-        const productById:IProduct|null = await Product.findById({_id: productInfo.productId, isDeleted: false})
+        const productById:IProduct|null = await Product.findOne({_id: productInfo.productId, isDeleted: false})
 
         if(!productById)
             throw new createError.BadRequest(`No productById exits with ID: ${productInfo.productId} or it has been deleted`)

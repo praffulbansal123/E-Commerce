@@ -8,8 +8,9 @@ import morgan from 'morgan';
 import MongoStore from 'connect-mongo';
 import Database from './database/db';
 import userRouter from './routes/userRoutes';
-import productRouter from './routes/productRoutes';
+import productRouter from './routes/productRoute';
 import cartRouter from './routes/cartRoutes'
+import orderRouter from './routes/orderRoute'
 import multer from 'multer';
 import Locals from './config/config';
 
@@ -62,6 +63,9 @@ app.use("/product", productRouter);
 
 // diverting cart request to cart router
 app.use("/cart", cartRouter);
+
+// diverting order request to order router
+app.use("/order", orderRouter);
 
 // checking invalid route
 app.use((req, res, next) => {
