@@ -16,7 +16,8 @@ const formDataValidator = (req:Request, next:NextFunction, schema:any) => {
         stripUnknown: true // remove unknown props
     };
     
-    let requestBody = {...req.body, ...req.query}
+    let requestBody = {...req.body, ...req.query, ...req.params}
+    console.log(requestBody)
     
     if(requestBody.address) {
         requestBody.address = JSON.parse(requestBody.address);
@@ -100,10 +101,10 @@ export const removeProductSchema = (req:Request, res:Response, next:NextFunction
 
 export const orderCreateSchema = (req:Request, res:Response, next:NextFunction) => {
     const schema = createOrderSchema
-    requestValidator(req, next, schema);
+    formDataValidator(req, next, schema);
 }
 
 export const updateOrderStatusSchema = (req:Request, res:Response, next:NextFunction) => {
     const schema = orderStstusSchema
-    requestValidator(req, next, schema);
+    formDataValidator(req, next, schema);
 }

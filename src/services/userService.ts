@@ -5,19 +5,19 @@ import { uploadFile } from '../providers/aws';
 import bcrypt from 'bcrypt'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
 import Locals from '../config/config';
-import { Types } from 'mongoose';
 import {omit} from 'lodash'
 import IUser from '../interface/models/user'
 import { IFiles } from '../interface/vendors/files';
 import Cart from '../models/cartModel';
 import ICart from '../interface/models/cart';
 import {IEmptyCart} from '../interface/vendors/IEmptyCart'
+import { IUserUpdate } from '../interface/vendors/user';
 
 /*
 * @author Prafful Bansal
 * @description Service for creating new users
 */
-const validatePincode = async (input: number): Promise<string> => {
+const validatePincode = async (input:number):Promise<string> => {
     try {
         const options = {
             method: "GET",
@@ -37,7 +37,7 @@ const validatePincode = async (input: number): Promise<string> => {
     }
 }
 
-export const createUser = async (input: IUser, image: IFiles): Promise<any> => {
+export const createUser = async (input:IUser, image:IFiles):Promise<any> => {
     try {
 
         // Destructuring address
@@ -78,10 +78,10 @@ export const createUser = async (input: IUser, image: IFiles): Promise<any> => {
         input.profileImage = profileImage as string
 
         // Creating user
-        const user : IUserModel = await User.create(input)
+        const user:IUserModel = await User.create(input)
 
         // Creating cart for individual user
-        const newCartData: IEmptyCart = {
+        const newCartData:IEmptyCart = {
             userId: user._id,
             items: [],
             totalPrice: 0,
@@ -141,7 +141,7 @@ export const loginUser = async (input: any) : Promise<any> => {
 * @author Prafful Bansal
 * @description Service for getting user details
 */
-export const getUserDetails = async (input: string, payload: JwtPayload) : Promise<any> => {
+export const getUserDetails = async (input:string, payload:JwtPayload):Promise<any> => {
     try {
         if(input !== payload.userId)
             throw new createError.Unauthorized('User is not authorized for this resource')
@@ -162,9 +162,9 @@ export const getUserDetails = async (input: string, payload: JwtPayload) : Promi
 * @author Prafful Bansal
 * @description Service for updating user details
 */
-export const updateUser = async (requestBody: any, image: any, userId: String) : Promise<any> => {
+export const updateUser = async (requestBody:IUserUpdate, image:IFiles, userId:String):Promise<any> => {
     try {
-        const updates: any = {}
+        const updates:any = {}
 
         const user = await User.findById(userId)
 
@@ -183,7 +183,7 @@ export const updateUser = async (requestBody: any, image: any, userId: String) :
                 throw new createError.BadRequest('Invalid image format')
         
             // Uploading profile image to AWS_S3
-            const profileImage = await uploadFile(image[0])
+            const profileImage = await uploadFile(image[0]) as string
 
             updates.profileImage = profileImage
         }

@@ -4,20 +4,22 @@ import logger from '../logger/logger';
 import { createUser, loginUser, getUserDetails, updateUser } from '../services/userService';
 import { IUserModel } from '../models/userModel';
 import { JwtPayload } from 'jsonwebtoken';
-import IRequest from '../interface/vendors/requestInterface';
+import { IFiles } from '../interface/vendors/files';
+import IUser from '../interface/models/user';
+import { IRequest, IUserUpdate } from '../interface/vendors/user';
 
 /*
 * @author Prafful Bansal
 * @description User registration 
 * @route POST user/register
 */
-export const createUserHandler = async (req: Request, res: Response, next : NextFunction): Promise<any> => {
+export const createUserHandler:RequestHandler = async (req:Request, res:Response, next:NextFunction) => {
     try {
 
-        const requestBody = req.body
-        const image = req.files
+        const requestBody:IUser = req.body
+        const image:IFiles = req.files
 
-        const user: IUserModel = await createUser(requestBody, image);
+        const user:IUser = await createUser(requestBody, image);
     
         return res.status(201).send({status: true, message: 'New User successfully registered', data: user});
         
@@ -80,11 +82,11 @@ export const getUserDetailsHandler: RequestHandler = async (req: IRequest, res: 
 */
 export const updateUserDetailsHandler: RequestHandler = async (req: IRequest, res: Response, next : NextFunction) => {
     try {
-        const userId = req.params.userId
-        const requestBody = req.body
-        const image = req.files
+        const userId:string = req.params.userId
+        const requestBody:IUserUpdate = req.body
+        const image:IFiles = req.files
 
-        const user : IUserModel = await updateUser(requestBody, image, userId)
+        const user:IUserModel = await updateUser(requestBody, image, userId)
 
         return res.status(200).send({status: true, message: 'User details updated Successfully', data: user})
 

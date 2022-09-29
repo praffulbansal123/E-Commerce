@@ -72,10 +72,6 @@ export const orderStatusService = async (userId:string, orderId:string, requestB
     try {
         // Destructuring request body
         const {status} = requestBody
-
-        // Validating type of orderId
-        if(!Types.ObjectId.isValid(orderId))
-            throw new createError.BadRequest('Please provide a valid orderId')
         
         // Checking if order exits with given ID
         const orderByOrderId:IOrder|null = await Order.findOne({_id: orderId, isDeleted: false})

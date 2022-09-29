@@ -3,15 +3,15 @@ import IProduct from "../interface/models/product"
 import createError from 'http-errors';
 import { uploadFile } from '../providers/aws';
 import {Types} from 'mongoose';
-import { IProductUpdate } from '../interface/vendors/productUpdate';
+import { IFilterCondition, IProductUpdate, IRBCreateProduct, IRBGetProduct } from '../interface/vendors/product';
 import { IFiles } from '../interface/vendors/files';
 
-export const createProductService = async (input: IProduct, image: IFiles) => {
+export const createProductService = async (input:IRBCreateProduct, image:IFiles):Promise<IProduct> => {
     try {
         // Checking for profile image
-        if(image.length === 0 || !image)
+        if(!image)
             throw new createError.BadRequest("Profile Image is required");
-
+        
         if(image.length>=2)
             throw new createError.BadRequest("Only one profile picture is allowed")
         
@@ -29,7 +29,7 @@ export const createProductService = async (input: IProduct, image: IFiles) => {
         input.productImage = productImage as string
 
         // Creating product
-        const product: IProduct = await Product.create(input)
+        const product:IProduct = await Product.create(input)
 
         return product
     } catch (error:any) {
@@ -37,47 +37,60 @@ export const createProductService = async (input: IProduct, image: IFiles) => {
     }
 }
 
-export const getProductService = async (input: any) => {
+export const getProductService = async (input:IRBGetProduct):Promise<Array<IProduct>> => {
     try {
-        const filterCondition: any = {isDeleted: false, deletedAt: null}
+        // Adding not deleted to filterCondition
+        const filterCondition:IFilterCondition = {isDeleted: false, deletedAt: null}
 
+        // Checking for size in requestBody and adding it to filterCondition
         if(input.size){
             filterCondition.availableSizes = {$in: input.size}
         }
+
+        // Checking for price in requestBody and adding it to filterCondition
         if(input.priceLessThan && !input.priceGreaterThan){
             filterCondition.price = {$lt: input.priceLessThan}
         }
+
         if(!input.priceLessThan && input.priceGreaterThan){
             filterCondition.price = {$gt: input.priceGreaterThan}
         }
+
         if(input.priceLessThan && input.priceGreaterThan){
             filterCondition.price = {$lt: input.priceLessThan, $gt: input.priceGreaterThan}
         }
+
+        // Checking for title in requestBody and adding it to filterCondition
         if(input.name){
-            filterCondition.title = input
+            filterCondition.title = input.name
         }
-        let products
+
+        let products:Array<IProduct>
+
+        // Sorting products as per requestBody
         if(input.priceSort){
             products = await Product.find(filterCondition).sort({price: input.priceSort})
         } else {
             products = await Product.find(filterCondition)
         }
+
+        // Checking any product exits or not
         if(products.length === 0)
             throw new createError.NotFound('No products found with the given filterCondition')
-
+        
         return products
-
+        
     } catch (error:any) {
         throw error
     }
 }
 
-export const getProductByIdService = async (input: string): Promise<IProduct> => {
+export const getProductByIdService = async (input:string):Promise<IProduct> => {
     try {
         if(!Types.ObjectId.isValid(input))
             throw new createError.BadRequest('Please provide a valid input ID')
         
-        const product = await Product.findById({ _id: input, isDeleted: false}) as IProduct
+        const product:IProduct|null = await Product.findOne({ _id: input, isDeleted: false})
 
         if(!product)
             throw new createError.NotFound(`No product exits with ID: ${input} or it has been deleted`)
@@ -96,7 +109,7 @@ export const updatePoductService = async (productId:string, requestBody:IProduct
         const updates:IProductUpdate = {}
 
         
-        const product = await Product.findById({_id: productId, isDeleted: false})
+        const product:IProduct|null = await Product.findOne({_id: productId, isDeleted: false})
         
         if(!product)
             throw new createError.BadRequest(`No product exits with ID: ${productId}`)
@@ -121,7 +134,7 @@ export const updatePoductService = async (productId:string, requestBody:IProduct
             if(title === product.title)
                 throw new createError.BadRequest('Title of the product is already upto date')
                 
-                const isNotUniqueTitle: IProduct | null = await Product.findOne({title: title})
+                const isNotUniqueTitle:IProduct|null = await Product.findOne({title: title})
 
             if(isNotUniqueTitle)
                 throw new createError.BadRequest('Please provide a unique title to update')
