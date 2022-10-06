@@ -17,7 +17,6 @@ const formDataValidator = (req:Request, next:NextFunction, schema:any) => {
     };
     
     let requestBody = {...req.body, ...req.query, ...req.params}
-    console.log(requestBody)
     
     if(requestBody.address) {
         requestBody.address = JSON.parse(requestBody.address);
@@ -34,7 +33,7 @@ const formDataValidator = (req:Request, next:NextFunction, schema:any) => {
     const { error, value } = schema.validate(requestBody, options);
     if (error) {
         logger.info(error)
-         error.status = 422; 
+         error.status = 400; 
        return next(error);
     } else {
         req.body = value;
@@ -51,7 +50,7 @@ const requestValidator = (req:Request, next:NextFunction, schema:any) => {
     const { error, value } = schema.validate(req.body, options);
     if (error) {
         logger.info(error)
-         error.status = 422; 
+         error.status = 400; 
        return next(error);
     } else {
         req.body = value;

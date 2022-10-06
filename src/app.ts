@@ -13,6 +13,9 @@ import cartRouter from './routes/cartRoutes'
 import orderRouter from './routes/orderRoute'
 import multer from 'multer';
 import Locals from './config/config';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocs from './swagger/swaggerAPI.json';
+import logger from './logger/logger';
 
 // dotenv configuration
 dotenv.config()
@@ -55,6 +58,7 @@ app.use(multer().any());
 // Database initialized
 Database.init();
 
+
 // diverting user request to user router
 app.use("/user", userRouter);
 
@@ -67,6 +71,11 @@ app.use("/cart", cartRouter);
 // diverting order request to order router
 app.use("/order", orderRouter);
 
+// Swagger initialized
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+logger.info(`Docs available at http://localhost:${port}/api-docs`);
+
+
 // checking invalid route
 app.use((req, res, next) => {
     next( new createError.BadRequest("This route does not exits"))
@@ -75,13 +84,9 @@ app.use((req, res, next) => {
 // Intializing error-handling
 app.use((err : any, req : Request, res : Response, next : NextFunction) => {
     res.status(err.status || 500);
-    res.send({
-        error: {
-            status: err.status || 500,
-            message: err.message
-        }
-    })
+    res.send({statusCode: err.status || 500, status: false, message: err.message})
 });
+
 
 
 export default app;

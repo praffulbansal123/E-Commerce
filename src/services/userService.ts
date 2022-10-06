@@ -58,7 +58,7 @@ export const createUser = async (input:IUser, image:IFiles):Promise<any> => {
         } 
         
         // Checking for profile image
-        if(image.length === 0 || !image)
+        if(!image || image.length === 0)
             throw new createError.BadRequest("Profile Image is required");
 
         if(image.length>=2)

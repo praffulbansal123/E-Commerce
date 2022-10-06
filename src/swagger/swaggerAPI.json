@@ -1,0 +1,367 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Swagger Petstore - OpenAPI 3.0",
+    "description": "Users, Products, Carts and Orders REST API Docs",
+    "contact": {
+      "email": "prafful.bansal@gmail.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "user",
+      "description": "CRUD operations about users"
+    },
+    {
+      "name": "product",
+      "description": "CRUD operations about products"
+    },
+    {
+      "name": "cart",
+      "description": "CRUD operations about user's cart"
+    },
+    {
+      "name": "order",
+      "description": "CRUD operations about user's order"
+    }
+  ],
+  "paths": {
+    "/user/register": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Register user",
+        "description": "This is used to register new user.",
+        "operationId": "registerUser",
+        "requestBody": {
+          "description": "Created user object",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Log-in user",
+        "description": "This is used to logg in the user",
+        "operationId": "loginUser",
+        "requestBody": {
+          "description": "Create login object for the user",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "406": {
+            "description": "Invalid Password"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "UserInput": {
+        "type": "object",
+        "required": [
+          "fname",
+          "lname",
+          "email",
+          "password",
+          "phone",
+          "address"
+        ],
+        "properties": {
+          "fname": {
+            "type": "string",
+            "default": "Rahul"
+          },
+          "lname": {
+            "type": "string",
+            "default": "Sharma"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "default": "rs@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "writeOnly": true,
+            "default": "P@ssword123"
+          },
+          "phone": {
+            "type": "string",
+            "default": 9865741829
+          },
+          "profileImage": {
+            "type": "string",
+            "format": "binary",
+            "description": "The profile picture to upload"
+          },
+          "address": {
+            "type": "object",
+            "required": [
+              "shipping",
+              "billing"
+            ],
+            "properties": {
+              "shipping": {
+                "type": "object",
+                "required": [
+                  "street",
+                  "city",
+                  "pincode"
+                ],
+                "properties": {
+                  "street": {
+                    "type": "string",
+                    "default": "string"
+                  },
+                  "city": {
+                    "type": "string",
+                    "default": "string"
+                  },
+                  "pincode": {
+                    "type": "number",
+                    "default": 159147
+                  }
+                }
+              },
+              "billing": {
+                "type": "object",
+                "required": [
+                  "street",
+                  "city",
+                  "pincode"
+                ],
+                "properties": {
+                  "street": {
+                    "type": "string",
+                    "default": "string"
+                  },
+                  "city": {
+                    "type": "string",
+                    "default": "string"
+                  },
+                  "pincode": {
+                    "type": "number",
+                    "default": 159147
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "UserOutput": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "default": "New User successfully registered"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "format": "byte"
+              },
+              "fname": {
+                "type": "string"
+              },
+              "lname": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "password": {
+                "type": "string",
+                "format": "password",
+                "writeOnly": true
+              },
+              "phone": {
+                "type": "string"
+              },
+              "profileImage": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "address": {
+                "type": "object",
+                "required": [
+                  "shipping",
+                  "billing"
+                ],
+                "properties": {
+                  "shipping": {
+                    "type": "object",
+                    "required": [
+                      "street",
+                      "city",
+                      "pincode"
+                    ],
+                    "properties": {
+                      "street": {
+                        "type": "string"
+                      },
+                      "city": {
+                        "type": "string"
+                      },
+                      "pincode": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "billing": {
+                    "type": "object",
+                    "required": [
+                      "street",
+                      "city",
+                      "pincode"
+                    ],
+                    "properties": {
+                      "street": {
+                        "type": "string"
+                      },
+                      "city": {
+                        "type": "string"
+                      },
+                      "pincode": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "LoginUser": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "default": "rs@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "default": "P@ssword123"
+          }
+        }
+      },
+      "LoginOutput": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "default": "User Login Successfull"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "type": "string",
+                "format": "byte"
+              },
+              "token": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
