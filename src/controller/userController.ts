@@ -65,6 +65,8 @@ export const getUserDetailsHandler: RequestHandler = async (req: IRequest, res: 
         const payload = req.decodedToken as JwtPayload
         const userId: string = req.params.userId
 
+        console.log(payload, userId)
+
         const user = await getUserDetails(userId, payload)
 
         return res.status(200).send({status: true, message: 'User profile details fecthed', data: user})

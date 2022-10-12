@@ -33,7 +33,7 @@ const formDataValidator = (req:Request, next:NextFunction, schema:any) => {
     const { error, value } = schema.validate(requestBody, options);
     if (error) {
         logger.info(error)
-         error.status = 400; 
+         error.status = 422; 
        return next(error);
     } else {
         req.body = value;
@@ -50,7 +50,7 @@ const requestValidator = (req:Request, next:NextFunction, schema:any) => {
     const { error, value } = schema.validate(req.body, options);
     if (error) {
         logger.info(error)
-         error.status = 400; 
+         error.status = 422; 
        return next(error);
     } else {
         req.body = value;

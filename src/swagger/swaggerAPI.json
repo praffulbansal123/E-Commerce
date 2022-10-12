@@ -1,9 +1,10 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Swagger Petstore - OpenAPI 3.0",
+    "title": "Swagger E-Commerce - OpenAPI 3.0",
     "description": "Users, Products, Carts and Orders REST API Docs",
     "contact": {
+      "name": "Prafful Bansal",
       "email": "prafful.bansal@gmail.com"
     },
     "license": {
@@ -53,24 +54,20 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UserInput"
+                "$ref": "#/components/schemas/UserModel"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserOutput"
-                }
-              }
-            }
+            "description": "Successful operation"
           },
           "400": {
             "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validaton Error"
           }
         }
       }
@@ -88,21 +85,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginUser"
+                "$ref": "#/components/schemas/LoginUserModel"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginOutput"
-                }
-              }
-            }
+            "description": "Successful operation"
           },
           "400": {
             "description": "Bad Request"
@@ -112,6 +102,643 @@
           },
           "406": {
             "description": "Invalid Password"
+          }
+        }
+      }
+    },
+    "/user/getdetails/{userId}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get User Details",
+        "description": "This is used to fect the user details",
+        "operationId": "getUserDetails",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/user/updateUser/{userId}": {
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update User Details",
+        "description": "This is used to update the user details",
+        "operationId": "updateUserDetails",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update user object",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "422": {
+            "description": "Validaton Error"
+          }
+        }
+      }
+    },
+    "/product/create": {
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Create Product",
+        "description": "This is used to create the product",
+        "operationId": "createProduct",
+        "requestBody": {
+          "description": "Create Product Object",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validaton Error"
+          }
+        }
+      }
+    },
+    "/product/get": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Get Products by Filter Conditions",
+        "description": "This is used to get the list of products as per filter conditions",
+        "operationId": "getProduct",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filltering the products with the name",
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "priceLessThan",
+            "in": "query",
+            "description": "Getting the products with the lesser price",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "priceGreaterThan",
+            "in": "query",
+            "description": "Getting the products with the greater price",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "priceSort",
+            "in": "query",
+            "description": "Sorting the product in asec or desc as price",
+            "schema": {
+              "type": "integer",
+              "minimum": -1,
+              "maximum": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "XS",
+                  "S",
+                  "M",
+                  "L",
+                  "XL",
+                  "XXL"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error"
+          }
+        }
+      }
+    },
+    "/product/get/{productId}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Get Product Details By Product ID",
+        "description": "This is used to fect the product details",
+        "operationId": "getProductDetails",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "Product ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/product/update/{productId}": {
+      "put": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Update the Product Details",
+        "description": "This is used to update the product details",
+        "operationId": "updateProductDetails",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "Product ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update Product Object",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductUpdateModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validaton Error"
+          }
+        }
+      }
+    },
+    "/product/delete/{productId}": {
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "summary": "Detele Product By Product ID",
+        "description": "This is used to delete the product details",
+        "operationId": "deleteProduct",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "Product ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/cart/{userId}/addProduct": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Add Product to Cart",
+        "description": "This is used to add product to the cart",
+        "operationId": "addProduct",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Add Product to Cart object",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productId",
+                  "quantity"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "format": "byte"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "format": "int32",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "422": {
+            "description": "Validaton Error"
+          }
+        }
+      }
+    },
+    "/cart/{userId}/removeProduct": {
+      "put": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Remove Product from Cart",
+        "description": "This is used to remove product to the cart",
+        "operationId": "removeProduct",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Add Product to Cart object",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productId",
+                  "removeProduct"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "format": "byte"
+                  },
+                  "removeProduct": {
+                    "type": "integer",
+                    "format": "int32",
+                    "enum": [
+                      1,
+                      0
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "422": {
+            "description": "Validaton Error"
+          }
+        }
+      }
+    },
+    "/cart/{userId}/cartDetails": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Get Cart Details of user",
+        "description": "This is used to get details of cart for the user",
+        "operationId": "cartDetails",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/cart/{userId}/emptyCart": {
+      "delete": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Empty Cart of user",
+        "description": "This is used to empty cart for the user",
+        "operationId": "emptyCart",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/order/{userId}/create": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "Create Order for user",
+        "description": "This is used to create Order for the user",
+        "operationId": "createOrder",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Add Product to Cart object",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "422": {
+            "description": "Validation Error"
+          }
+        }
+      }
+    },
+    "/order/{userId}/{orderId}": {
+      "put": {
+        "tags": [
+          "order"
+        ],
+        "summary": "Update Order Status",
+        "description": "This is used to update Order Status",
+        "operationId": "updateStatus",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "Order ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pending",
+                      "completed",
+                      "cancelled"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "422": {
+            "description": "Validation Error"
           }
         }
       }
@@ -125,8 +752,13 @@
         "bearerFormat": "JWT"
       }
     },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Access token is missing or invalid"
+      }
+    },
     "schemas": {
-      "UserInput": {
+      "UserModel": {
         "type": "object",
         "required": [
           "fname",
@@ -220,105 +852,7 @@
           }
         }
       },
-      "UserOutput": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "boolean",
-            "default": true
-          },
-          "message": {
-            "type": "string",
-            "default": "New User successfully registered"
-          },
-          "data": {
-            "type": "object",
-            "properties": {
-              "_id": {
-                "type": "string",
-                "format": "byte"
-              },
-              "fname": {
-                "type": "string"
-              },
-              "lname": {
-                "type": "string"
-              },
-              "email": {
-                "type": "string",
-                "format": "email"
-              },
-              "password": {
-                "type": "string",
-                "format": "password",
-                "writeOnly": true
-              },
-              "phone": {
-                "type": "string"
-              },
-              "profileImage": {
-                "type": "string"
-              },
-              "createdAt": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "updatedAt": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "address": {
-                "type": "object",
-                "required": [
-                  "shipping",
-                  "billing"
-                ],
-                "properties": {
-                  "shipping": {
-                    "type": "object",
-                    "required": [
-                      "street",
-                      "city",
-                      "pincode"
-                    ],
-                    "properties": {
-                      "street": {
-                        "type": "string"
-                      },
-                      "city": {
-                        "type": "string"
-                      },
-                      "pincode": {
-                        "type": "number"
-                      }
-                    }
-                  },
-                  "billing": {
-                    "type": "object",
-                    "required": [
-                      "street",
-                      "city",
-                      "pincode"
-                    ],
-                    "properties": {
-                      "street": {
-                        "type": "string"
-                      },
-                      "city": {
-                        "type": "string"
-                      },
-                      "pincode": {
-                        "type": "number"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "LoginUser": {
+      "LoginUserModel": {
         "type": "object",
         "required": [
           "email",
@@ -337,28 +871,254 @@
           }
         }
       },
-      "LoginOutput": {
+      "UserUpdateModel": {
         "type": "object",
         "properties": {
-          "status": {
+          "fname": {
+            "type": "string",
+            "default": "Rahul"
+          },
+          "lname": {
+            "type": "string",
+            "default": "Sharma"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "default": "rs@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "writeOnly": true,
+            "default": "P@ssword123"
+          },
+          "phone": {
+            "type": "string",
+            "default": 9865741829
+          },
+          "profileImage": {
+            "type": "string",
+            "format": "binary",
+            "description": "The profile picture to upload"
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "shipping": {
+                "type": "object",
+                "required": [
+                  "street",
+                  "city",
+                  "pincode"
+                ],
+                "properties": {
+                  "street": {
+                    "type": "string",
+                    "default": "string"
+                  },
+                  "city": {
+                    "type": "string",
+                    "default": "string"
+                  },
+                  "pincode": {
+                    "type": "number",
+                    "default": 159147
+                  }
+                }
+              },
+              "billing": {
+                "type": "object",
+                "required": [
+                  "street",
+                  "city",
+                  "pincode"
+                ],
+                "properties": {
+                  "street": {
+                    "type": "string",
+                    "default": "string"
+                  },
+                  "city": {
+                    "type": "string",
+                    "default": "string"
+                  },
+                  "pincode": {
+                    "type": "number",
+                    "default": 159147
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ProductModel": {
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "price",
+          "currencyId",
+          "currencyFormat",
+          "availableSizes",
+          "installments"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "default": "Winter Jacket",
+            "minLength": 3
+          },
+          "description": {
+            "type": "string",
+            "default": "This is winter jacket"
+          },
+          "price": {
+            "type": "number",
+            "default": 125.25
+          },
+          "currencyId": {
+            "type": "string",
+            "enum": [
+              "INR",
+              "GBP",
+              "USD"
+            ],
+            "default": "INR"
+          },
+          "currencyFormat": {
+            "type": "string",
+            "default": "₹"
+          },
+          "isFreeShipping": {
+            "type": "boolean",
+            "default": false
+          },
+          "productImage": {
+            "type": "string",
+            "format": "binary",
+            "description": "The product image to upload"
+          },
+          "availableSizes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "XS",
+                "S",
+                "M",
+                "L",
+                "XL",
+                "XXL"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 6,
+            "uniqueItems": true,
+            "default": [
+              "S",
+              "L"
+            ]
+          },
+          "installments": {
+            "type": "integer",
+            "format": "int32",
+            "default": 19
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "default": null
+          },
+          "isDeleted": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "ProductUpdateModel": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "currencyId": {
+            "type": "string",
+            "enum": [
+              "INR",
+              "GBP",
+              "USD"
+            ]
+          },
+          "currencyFormat": {
+            "type": "string"
+          },
+          "isFreeShipping": {
+            "type": "boolean"
+          },
+          "productImage": {
+            "type": "string",
+            "format": "binary",
+            "description": "The product image to upload"
+          },
+          "availableSizes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "XS",
+                "S",
+                "M",
+                "L",
+                "XL",
+                "XXL"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 6,
+            "uniqueItems": true
+          },
+          "installments": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OrderModel": {
+        "type": "object",
+        "required": [
+          "cancellable",
+          "status",
+          "isDeleted"
+        ],
+        "properties": {
+          "cancellable": {
             "type": "boolean",
             "default": true
           },
-          "message": {
+          "status": {
             "type": "string",
-            "default": "User Login Successfull"
+            "default": "pending",
+            "enum": [
+              "pending",
+              "completed",
+              "cancelled"
+            ]
           },
-          "data": {
-            "type": "object",
-            "properties": {
-              "user": {
-                "type": "string",
-                "format": "byte"
-              },
-              "token": {
-                "type": "string"
-              }
-            }
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDeleted": {
+            "type": "boolean",
+            "default": false
           }
         }
       }

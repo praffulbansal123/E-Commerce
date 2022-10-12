@@ -6,7 +6,6 @@ import Cart from "../models/cartModel";
 import Product from "../models/productModel";
 import Order from "../models/orderModel";
 import createError from 'http-errors';
-import { Types } from "mongoose";
 
 export const createOrderService = async (input:string, requestBody:IRBOrder): Promise<IOrder> => {
     try {
@@ -36,7 +35,6 @@ export const createOrderService = async (input:string, requestBody:IRBOrder): Pr
             if(productDetails.installments < ele.quantity)
                 throw new createError.BadRequest(`Product with ID: ${ele.productId} is out of stock`)
         }
-        console.log(userCart.userId)
 
         const orderData:ICreateOrder = {
             userId: userCart.userId,

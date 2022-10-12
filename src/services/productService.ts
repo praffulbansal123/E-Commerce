@@ -9,7 +9,7 @@ import { IFiles } from '../interface/vendors/files';
 export const createProductService = async (input:IRBCreateProduct, image:IFiles):Promise<IProduct> => {
     try {
         // Checking for profile image
-        if(!image)
+        if(!image || image.length === 0)
             throw new createError.BadRequest("Profile Image is required");
         
         if(image.length>=2)
@@ -183,7 +183,7 @@ export const deleteProductService = async (input: string): Promise<IProduct> => 
         if(!Types.ObjectId.isValid(input))
             throw new createError.BadRequest('Please provide a valid input ID')
         
-        const product:IProduct|null = await Product.findById({ _id: input, isDeleted: false})
+        const product:IProduct|null = await Product.findOne({ _id: input, isDeleted: false})
 
         if(!product)
             throw new createError.NotFound(`No product exits with ID: ${input} or it has been deleted`)
